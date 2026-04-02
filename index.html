@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Bellows Extension Calculator</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bellows Calc">
+<meta name="theme-color" content="#1B3A5C">
+<meta name="description" content="Bellows Extension Factor Calculator — Crealdé School of Art Large Format Photography">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231B3A5C' rx='40'/%3E%3Ctext x='90' y='100' font-family='Georgia,serif' font-size='36' fill='%23C4A882' text-anchor='middle'%3EBellows%3C/text%3E%3Ctext x='90' y='135' font-family='Georgia,serif' font-size='28' fill='%23C4A882' text-anchor='middle'%3ECalc%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231B3A5C' rx='6'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='11' fill='%23C4A882' text-anchor='middle'%3EBx%3C/text%3E%3C/svg%3E">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #ffffff;
+    --bg2:       #f4f4f4;
+    --bg3:       #ebebeb;
+    --text:      #111111;
+    --text2:     #666666;
+    --text3:     #999999;
+    --border:    rgba(0,0,0,0.12);
+    --border2:   rgba(0,0,0,0.22);
+    --navy:      #1B3A5C;
+    --blue:      #185FA5;
+    --blue-bg:   #E6F1FB;
+    --blue-text: #0C447C;
+    --red:       #A32D2D;
+    --red-bg:    #FCEBEB;
+    --amber:     #854F0B;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #1a1a1a;
+      --bg2:       #242424;
+      --bg3:       #2e2e2e;
+      --text:      #e8e8e8;
+      --text2:     #999999;
+      --text3:     #666666;
+      --border:    rgba(255,255,255,0.1);
+      --border2:   rgba(255,255,255,0.2);
+      --blue:      #5B9BD5;
+      --blue-bg:   #0C447C;
+      --blue-text: #B5D4F4;
+      --red:       #D96B6B;
+      --red-bg:    #501313;
+      --amber:     #D4900A;
+    }
+  }
+
+  html, body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .install-banner {
+    display: none;
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 20px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .install-banner.show { display: block; }
+  .install-banner strong { font-size: 13px; }
+
+  .topbar {
+    background: var(--navy);
+    padding: env(safe-area-inset-top, 0px) 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 99;
+  }
+  .topbar-inner {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar h1 { font-size: 16px; font-weight: 500; color: #fff; }
+  .topbar p  { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #C4A882; margin-top: 1px; }
+
+  .page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 16px calc(48px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .unit-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .unit-btn {
+    flex: 1;
+    padding: 9px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text2);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+  }
+  .unit-btn.active {
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    border-color: var(--blue);
+    font-weight: 500;
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 5px;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 16px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-appearance: none;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.12);
+  }
+  .field-hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  .result-panel {
+    background: var(--bg2);
+    border-radius: var(--radius-lg);
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .result-label {
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 10px;
+  }
+
+  .result-stops {
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 6px;
+    transition: color .2s;
+  }
+  .result-stops.warn { color: var(--red); }
+  .result-stops.none { color: var(--text3); font-size: 32px; padding: 12px 0; }
+
+  .result-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    min-height: 20px;
+  }
+  .result-sub.warn { color: var(--red); }
+
+  .result-divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: left;
+  }
+  .detail-lbl {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 3px;
+  }
+  .detail-val {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .formula-note {
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--text3);
+    font-style: italic;
+    text-align: center;
+  }
+
+  .info-box {
+    margin-top: 20px;
+    background: var(--bg2);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    border-left: 3px solid var(--blue);
+  }
+  .info-box p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .info-box p:last-child { margin-bottom: 0; }
+  .info-box strong { color: var(--text); font-weight: 500; }
+
+  .footer {
+    margin-top: 40px;
+    padding-top: 14px;
+    border-top: 0.5px solid var(--border);
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="install-banner" id="install-banner">
+  <strong>Add to Home Screen</strong><br>
+  Tap Share in Safari then "Add to Home Screen" to install.
+</div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <h1>Bellows Extension Calculator</h1>
+      <p>Crealdé School of Art · Large Format Photography</p>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="unit-row">
+    <button class="unit-btn active" id="btn-metric" onclick="setUnit('metric')">Metric (mm)</button>
+    <button class="unit-btn" id="btn-imperial" onclick="setUnit('imperial')">Imperial (in)</button>
+  </div>
+
+  <div class="fields">
+    <div class="field">
+      <label>Focal length</label>
+      <input type="number" id="inp-focal" value="150" min="1" step="1" inputmode="decimal">
+      <div class="field-hint" id="hint-focal">mm</div>
+    </div>
+    <div class="field">
+      <label>Bellows extension</label>
+      <input type="number" id="inp-bellows" value="200" min="1" step="1" inputmode="decimal">
+      <div class="field-hint" id="hint-bellows">mm — measured from film plane to lens</div>
+    </div>
+  </div>
+
+  <div class="result-panel">
+    <div class="result-label">Exposure compensation</div>
+    <div class="result-stops" id="r-stops">—</div>
+    <div class="result-sub" id="r-sub"></div>
+
+    <div class="result-divider"></div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="detail-lbl">Bellows factor</div>
+        <div class="detail-val" id="r-factor">—</div>
+      </div>
+      <div>
+        <div class="detail-lbl">Extension ratio</div>
+        <div class="detail-val" id="r-ratio">—</div>
+      </div>
+      <div>
+        <div class="detail-lbl">Magnification</div>
+        <div class="detail-val" id="r-mag">—</div>
+      </div>
+      <div>
+        <div class="detail-lbl">Stops to add</div>
+        <div class="detail-val" id="r-exact">—</div>
+      </div>
+    </div>
+
+    <div class="formula-note" id="r-formula"></div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>How to use:</strong> Measure the bellows draw from the film plane to the rear of the lens. Enter that value along with the focal length of your lens.</p>
+    <p><strong>Formula:</strong> Bellows factor = (extension ÷ focal length)². Stops = log₂(factor).</p>
+    <p><strong>Rule of thumb:</strong> At 1:1 magnification (extension = 2× focal length) add 2 stops. At 1:2 magnification add 1 stop.</p>
+  </div>
+
+  <div class="footer">Large Format Photography &nbsp;·&nbsp; Crealdé School of Art &nbsp;·&nbsp; Jon Manchester</div>
+
+</div>
+
+<script>
+(function(){
+  let unit = 'metric';
+
+  function setUnit(u){
+    const fInp = document.getElementById('inp-focal');
+    const bInp = document.getElementById('inp-bellows');
+    const fCur = parseFloat(fInp.value);
+    const bCur = parseFloat(bInp.value);
+    const fMM = isNaN(fCur) ? null : (unit === 'imperial' ? fCur * 25.4 : fCur);
+    const bMM = isNaN(bCur) ? null : (unit === 'imperial' ? bCur * 25.4 : bCur);
+    unit = u;
+    document.getElementById('btn-metric').classList.toggle('active', u === 'metric');
+    document.getElementById('btn-imperial').classList.toggle('active', u === 'imperial');
+    const lbl = u === 'metric' ? 'mm' : 'in';
+    document.getElementById('hint-focal').textContent = lbl;
+    document.getElementById('hint-bellows').textContent = lbl + ' — measured from film plane to lens';
+    if(u === 'imperial'){
+      if(fMM !== null) fInp.value = (fMM / 25.4).toFixed(2);
+      if(bMM !== null) bInp.value = (bMM / 25.4).toFixed(2);
+      fInp.step = '0.01';
+      bInp.step = '0.01';
+    } else {
+      if(fMM !== null) fInp.value = Math.round(fMM);
+      if(bMM !== null) bInp.value = Math.round(bMM);
+      fInp.step = '1';
+      bInp.step = '1';
+    }
+    calc();
+  }
+
+  function stopsText(stops){
+    if(stops < 0.1)  return 'No compensation needed';
+    if(stops < 0.42) return 'Add \u2153 stop';
+    if(stops < 0.75) return 'Add \u2154 stop';
+    if(stops < 1.17) return 'Add 1 stop';
+    if(stops < 1.5)  return 'Add 1\u2153 stops';
+    if(stops < 1.83) return 'Add 1\u2154 stops';
+    if(stops < 2.17) return 'Add 2 stops';
+    if(stops < 2.5)  return 'Add 2\u2153 stops';
+    if(stops < 2.83) return 'Add 2\u2154 stops';
+    if(stops < 3.17) return 'Add 3 stops';
+    return 'Add ' + stops.toFixed(1) + ' stops';
+  }
+
+  function calc(){
+    const fRaw = parseFloat(document.getElementById('inp-focal').value);
+    const bRaw = parseFloat(document.getElementById('inp-bellows').value);
+
+    const stopsEl  = document.getElementById('r-stops');
+    const subEl    = document.getElementById('r-sub');
+    const factorEl = document.getElementById('r-factor');
+    const ratioEl  = document.getElementById('r-ratio');
+    const magEl    = document.getElementById('r-mag');
+    const exactEl  = document.getElementById('r-exact');
+    const formulaEl= document.getElementById('r-formula');
+
+    if(isNaN(fRaw) || isNaN(bRaw) || fRaw <= 0 || bRaw <= 0){
+      stopsEl.textContent = '—'; stopsEl.className = 'result-stops';
+      subEl.textContent = 'Enter focal length and bellows extension'; subEl.className = 'result-sub';
+      factorEl.textContent = '—'; ratioEl.textContent = '—';
+      magEl.textContent = '—'; exactEl.textContent = '—'; formulaEl.textContent = '';
+      return;
+    }
+
+    const f = unit === 'imperial' ? fRaw * 25.4 : fRaw;
+    const b = unit === 'imperial' ? bRaw * 25.4 : bRaw;
+
+    if(b < f){
+      stopsEl.textContent = '—'; stopsEl.className = 'result-stops';
+      subEl.textContent = 'Bellows extension must be \u2265 focal length'; subEl.className = 'result-sub warn';
+      factorEl.textContent = '—'; ratioEl.textContent = '—';
+      magEl.textContent = '—'; exactEl.textContent = '—'; formulaEl.textContent = '';
+      return;
+    }
+
+    const factor = (b / f) * (b / f);
+    const stops  = Math.log2(factor);
+    const mag    = (b - f) / f;
+    const ratio  = b / f;
+
+    if(stops < 0.1){
+      stopsEl.textContent = '0';
+      stopsEl.className = 'result-stops none';
+    } else {
+      stopsEl.textContent = '+' + stops.toFixed(1);
+      stopsEl.className = 'result-stops' + (stops >= 2 ? ' warn' : '');
+    }
+
+    subEl.textContent = stopsText(stops);
+    subEl.className = 'result-sub' + (stops >= 2 ? ' warn' : '');
+
+    factorEl.textContent = factor.toFixed(2) + '\u00d7';
+    ratioEl.textContent  = ratio.toFixed(2) + ':1';
+    magEl.textContent    = mag.toFixed(2) + '\u00d7';
+    exactEl.textContent  = stops.toFixed(2) + ' stops';
+
+    const dStr = unit === 'imperial' ? bRaw.toFixed(2) + '"' : Math.round(b) + 'mm';
+    const fStr = unit === 'imperial' ? fRaw.toFixed(2) + '"' : Math.round(f) + 'mm';
+    formulaEl.textContent = '(' + dStr + ' \u00f7 ' + fStr + ')\u00b2 = ' + factor.toFixed(2);
+  }
+
+  document.getElementById('inp-focal').addEventListener('input', calc);
+  document.getElementById('inp-bellows').addEventListener('input', calc);
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  if(isIOS && !isStandalone && !sessionStorage.getItem('bellows-hint')){
+    document.getElementById('install-banner').classList.add('show');
+    sessionStorage.setItem('bellows-hint', '1');
+    setTimeout(()=> document.getElementById('install-banner').classList.remove('show'), 8000);
+  }
+
+  if('serviceWorker' in navigator){
+    const sw = `const C='bellows-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.add(self.location.href)));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+    const blob = new Blob([sw], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  }
+
+  calc();
+})();
+</script>
+</body>
+</html>
